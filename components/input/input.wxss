@@ -1,0 +1,23 @@
+.input-component {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border-bottom: 1px solid red;
+}
+
+.icon-slot {
+  flex: 0 0 auto;
+}
+
+input {
+  flex: 1 1 auto;
+  padding: 0 10px;
+  background-color: #eee;
+}
+
+.icon-close {
+  flex: 0 0 auto;
+}
+.placeholder {
+
+}

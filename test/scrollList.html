@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width,height=device-height,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Title</title>
+  <style>
+    body {
+      background: #eee;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .container {
+      padding: 10px;
+    }
+    .scroll-list {
+      position: relative;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      background-color: #fff;
+    }
+    .list-box {
+      flex: 1 1 auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .more {
+      flex: 0 0 auto;
+      padding: 0 10px;
+      background-color: darkorange;
+      color: #fff;
+    }
+    ul {
+      /*position: relative;*/
+      list-style-type: none;
+      background-color: #fff;
+      transform: translateX(-10px);
+    }
+    ul:after {
+      content: '';
+      display: block;
+      height: 0;
+      visibility: hidden;
+      clear: both;
+      
+    }
+    li {
+      float: left;
+      /*width: 80px;*/
+      padding-left: 10px;
+      text-align: center;
+      /*background-color: yellowgreen;*/
+    }
+    li img {
+      display: block;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto;
+      border-radius: 50%;
+    }
+    li h3 {
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 100;
+      color: #222;
+      font-size: 14px;
+    }
+    .console {
+      padding: 15px;
+      border-radius: 6px;
+      background-color: #fff;
+      margin-bottom: 30px;
+      font-size: 14px;
+      color: #666;
+      animation: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="console">
+    <p>sx: <span id="sx">0</span></p>
+    <p>mx: <span id="mx">0</span></p>
+    <p>dir: <span id="dir"></span></p>
+    <p>dt: <span id="dt">0</span></p>
+    <p>v: <span id="v">0</span></p>
+  </div>
+  <div class="scroll-list">
+    <div class="list-box">
+      <ul class="list">
+        <li class="list-item">
+          <img src="tesla.jpg">
+          <h3 class="username">TeslaTeslaTesla</h3>
+        </li>
+      </ul>
+    </div>
+    <div class="more">...</div>
+  </div>
+</div>
+
+
+<script src="./scroll-list.js"></script>
+<script>
+  
+  
+  function createUserList() {
+    var users = []
+    for (var i = 1; i <= 10; i++) {
+      users.push({
+        id: i,
+        name: 'Tesla' + i,
+        imgSrc: 'tesla.jpg'
+      })
+    }
+    return users
+  }
+  
+  var swipeList = new SwipeList({
+    el: '.list',
+    data: createUserList()
+  });
+  
+  document.querySelector('.more').addEventListener('touchstart', function() {
+    swipeList.stop()
+  }, false)
+  
+  
+</script>
+</body>
+</html>

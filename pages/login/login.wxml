@@ -1,0 +1,26 @@
+<image class="bg" src="/static/images/login_bg.png"></image>
+<view class="bg-mask"></view>
+<view class="login">
+  <image class="logo" src="/static/images/login_logo.png"></image>
+  <view class="form">
+  <view class="form-item">
+  
+  </view>
+    <view class="user-name-box input-box">
+      <input 
+      type="text"
+       class="user-name" 
+       data-type="userName"
+        value="{{mobile}}" 
+        placeholder="手机号码" 
+        bindinput="handleOnInput" />
+      <view wx:if="{{mobile}}" class="clear-input-btn" bindtap="handleClearMobile"></view>
+    </view>
+     <view class="password-box input-box">
+      <input type="password" data-type="password" class="password" value="{{password}}" placeholder="密码" bindinput="handleOnInput" />
+      <view wx:if="{{password}}" class="clear-input-btn" bindtap="handleClearPassword"></view>
+    </view>
+   <button class="login-btn" type="primary">登录</button>
+     <button class="register-btn" plain>注册</button>
+  </view>
+</view>
