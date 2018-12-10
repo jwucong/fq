@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Title</title>
+  <style>
+
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    .box {
+      position: relative;
+      width: 600px;
+      height: 150px;
+      border: 1px solid #222222;
+    }
+
+    .inner {
+      width: 150px;
+      height: 150px;
+      background-color: #eee;
+      transform: translateX(10px);
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="print">
+  <p>time: <span id="t">0</span></p>
+</div>
+
+<div class="box">
+  <div class="inner"></div>
+</div>
+
+
+<script>
+
+  var timerId = null;
+  var tid = null;
+  var pt = document.getElementById('t')
+  var box = document.querySelector('.box')
+  var inner = document.querySelector('.inner')
+  var w = box.clientWidth
+  var t0 = Date.now()
+  var startS = 0
+  var speed = 0.3
+
+  // cushioning()
+
+
+  function cushioning(s) {
+    var tx = _getTranslateX(inner)
+    var x = 0;
+    var t1 = Date.now()
+    var delta = 1
+    if (s) {
+      delta = s - startS
+      startS = s
+    }
+    x = tx - speed * delta
+    x = x <= 0 ? 0 : x;
+    console.log('delta: %o', delta)
+    console.log('x: %o', x)
+    console.log('delta x: %o', tx - x)
+    pt.innerText = secondToHms(Math.floor((t1 - t0)) / 1000)
+    if (tx <= 0) {
+      window.cancelAnimationFrame(timerId)
+      _css(inner, 'transform', 'matrix(1, 0, 0, 1, 0, 0)')
+    } else {
+      // x = x > 1 ? Math.ceil(x) : Math.floor(x)
+      _css(inner, 'transform', 'matrix(1, 0, 0, 1, ' + x + ', 0)')
+      timerId = window.requestAnimationFrame(cushioning)
+    }
+    console.log(tx)
+  }
+
+  function _getTranslateX(container) {
+    var matrix = _css(container, 'transform')
+    console.log('transform: %o', matrix)
+    var reg = /matrix|\(|\)/g
+    var x = matrix.replace(reg, '').split(',')[4]
+    return parseFloat(x)
+  }
+
+  function _css(el, attr, value) {
+    if (_is(attr, 'object')) {
+      for (var key in attr) {
+        if (attr.hasOwnProperty(key)) {
+          el.style[key] = attr[key]
+        }
+      }
+      return
+    }
+    if (!_is(value, 'undefined')) {
+      el.style[attr] = value
+      return
+    }
+    var css = window.getComputedStyle || document.defaultView.getComputedStyle
+    var style = css(el, null)
+    return style[attr]
+  }
+
+  function _is(value, type) {
+    var className = {}.toString.call(value).replace(/^\[object\s(\w+)\]$/, '$1')
+    return type ? className.toLowerCase() === type.toLowerCase() : className
+  }
+
+  function secondToHms(s) {
+    if (s <= 0) {
+      return '00天00时00分00秒';
+    }
+    var f = function (v) {
+      return v < 10 ? '0' + v : v;
+    }
+    var dd = f(Math.floor(s / 3600 / 24));
+    var hh = f(Math.floor(s / 3600) % 24);
+    var mm = f(Math.floor(s / 60) % 60);
+    var ss = f(Math.floor(s % 60));
+    var array = [dd, '天', hh, '时', mm, '分', ss, '秒'];
+    return array.join('');
+  }
+
+
+  setTimeout(function() {
+    easeOutMove(_getTranslateX(inner), 590, 2000)
+  }, 2000)
+
+
+
+  function easeOutMove(star, end, duration) {
+    var t = 0;
+    var timerId = null
+    var realDuration = Math.floor(duration / 17)
+    var t0 = Date.now()
+    move();
+    function move() {
+      var offset = getOffsetX(t, star, end, realDuration)
+      console.log('offset: %o', offset)
+      _css(inner, 'transform', 'translateX(' + offset + 'px)')
+      pt.innerText = Date.now() - t0
+      t++;
+      if(t > realDuration) {
+        window.cancelAnimationFrame(timerId);
+      } else {
+        timerId = window.requestAnimationFrame(move);
+      }
+    }
+  }
+
+  /**
+   * 计算缓冲运动位置(时间与偏移的函数)
+   * x = delta * (-2^-10t/d + 1)
+   * @param t {Number} current time   开始运动的时间
+   * @param s {Number} start offsetX  运动的起始x偏移
+   * @param e {Number} end offsetX    运动的结束x偏移
+   * @param d {Number} duration(ms)   运动持续时间
+   * @return {Number} offsetX  当前时间的x偏移
+   */
+  function getOffsetX(t, s, e, d) {
+    console.group('getOffsetX')
+    console.log('t: %o', t)
+    console.log('s: %o', s)
+    console.log('e: %o', e)
+    console.log('d: %o', d)
+    var delta = Math.abs(e - s);
+    var x = t >= d ? delta : delta * (-Math.pow(2, -10 * t / d) + 1);
+    var offset = s < e ? s + x : s - x;
+    console.log('delta: %o', delta)
+    console.log('x: %o', x)
+    console.log('offset: %o', offset)
+    console.groupEnd()
+    return offset
+  }
+
+</script>
+</body>
+</html>

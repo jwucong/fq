@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width,height=device-height,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ease</title>
+
+  <style>
+
+    body {
+      background: #eee;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .container {
+      padding: 30px 12px;
+    }
+
+    .box {
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .ease {
+      position: relative;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      list-style-type: none;
+    }
+
+    .ease-item {
+      flex: 0 0 60px;
+      margin-right: 10px;
+    }
+
+    .ease-item:last-child {
+      margin-right: 0;
+    }
+
+    .ease .avatar {
+      display: block;
+      width: 60px;
+      height: 60px;
+      border-radius: 50px;
+    }
+
+    .ease .name {
+      display: block;
+      width: 100%;
+      padding: 10px 0;
+      font-size: 14px;
+      color: #333;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+  <div class="box">
+    <ul class="ease"></ul>
+  </div>
+</div>
+
+<script id="ease-item-template" type="text/x-template">
+<li class="ease-item">
+  <img class="avatar" src="{{avatar}}">
+  <h3 class="name">{{name}}</h3>
+</li>
+</script>
+
+<script src="./ease.js"></script>
+<script>
+
+  function createUserList() {
+    var users = []
+    for (var i = 1; i <= 10; i++) {
+      users.push({
+        id: i,
+        name: 'Tesla' + i,
+        avatar: 'tesla.jpg',
+      })
+    }
+    return users
+  }
+
+  var mockData = createUserList();
+
+  var ease = new Ease({
+    el: '.ease',
+    data: mockData,
+    itemTemplate: document.getElementById('ease-item-template').innerHTML
+  })
+  console.log(ease)
+
+
+</script>
+</body>
+</html>

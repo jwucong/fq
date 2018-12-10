@@ -1,12 +1,12 @@
 ;(function(window, document, undefined) {
-  
+
   var LIST_ITEM_TEMPLATE = [
     '<li class="list-item">',
     '<img class="list-item-img" src="{{imgSrc}}">',
     '<h3 class="list-item-title">{{name}}</h3>',
     '</li>'
   ].join('')
-  
+
   function SwipeList(options) {
     var defaults = {
       el: '.list',
@@ -20,9 +20,10 @@
     this.listContainer = this.isNode(el) ? el : document.querySelector(el);
     this.listSize = 0;
     this.timer = null;
+    this.isMoving = false
     this.init();
   }
-  
+
   SwipeList.prototype.init = function() {
     var that = this
     var container = this.listContainer
@@ -58,7 +59,7 @@
       var translateX = _getTranslateX(this)
       console.log(translateX)
       console.log(-n * itemWidth)
-      if(translateX >= 30 || translateX <= -n * itemWidth) {
+      if(translateX >= 50 || translateX <= -n * itemWidth) {
         return
       }
       var pageX = e.touches[0].pageX;
@@ -73,38 +74,23 @@
       _css(container, 'transform', matrix)
     })
     container.addEventListener('touchend', function () {
-      mx = 0
-      sx = 0
-      dir.innerText = ''
-      emx.innerText = 0
-      esx.innerText = 0
-      dt.innerText = 0
-      console.log(_getTranslateX(this))
-      if(_getTranslateX(container) > 0) {
-        // _css(container, {
-        //   animation: 'transform 3s',
-        //   transform: 'matrix(1, 0, 0, 1, 0, 0)'
-        // })
-        _css(this, 'animation', 'transform 3s')
-        _css(this, 'transform', 'matrix(1, 0, 0, 1, 0, 0)')
-        setTimeout(function() {
-          _css(container, 'animation', 'none')
-          // that.move()
-        }, 3000)
-        
+      var end = _getTranslateX(this)
+      console.log('end is: %o', end)
+      if(end > 0) {
+        that.easeOut(end, 0, 500)
       }else {
-        that.start()
+
       }
     })
-    this.start()
+
   }
-  
+
   SwipeList.prototype.is = _is
-  
+
   SwipeList.prototype.isNode = function(value) {
     return /^HTML(\w+)Element$/.test(this.is(value))
   }
-  
+
   SwipeList.prototype.extend = function() {
     var that = this
     var args = [].slice.call(arguments)
@@ -124,15 +110,38 @@
     })
     return target
   }
- 
+
   SwipeList.prototype.start = function () {
     this.move();
   }
-  
+
   SwipeList.prototype.stop = function () {
     window.cancelAnimationFrame(this.timer);
   }
-  
+
+  SwipeList.prototype.easeOut = function(star, end, duration) {
+    if(this.isMoving) {
+      return
+    }
+    this.isMoving = true
+    var that = this
+    var t = 0;
+    var timerId = null
+    var realDuration = Math.floor(duration / 17)
+    var move = function() {
+      var offset = getOffsetX(t, star, end, realDuration)
+      _css(that.listContainer, 'transform', 'translateX(' + offset + 'px)')
+      t++;
+      if(t > realDuration) {
+        window.cancelAnimationFrame(timerId);
+        that.isMoving = false
+      } else {
+        timerId = window.requestAnimationFrame(move);
+      }
+    }
+    move();
+  }
+
   SwipeList.prototype.move = function(direction) {
     var that = this
     var dir = direction === 'right' ? direction : 'left'
@@ -178,13 +187,13 @@
     var className = {}.toString.call(value).replace(/^\[object\s(\w+)\]$/, '$1')
     return type ? className.toLowerCase() === type.toLowerCase() : className
   }
-  
+
   function _createList(template, data) {
     return data.map(function(item) {
       return _replace(template, item);
     }).join('');
   }
-  
+
   function _replace(str, data) {
     for (var key in data) {
       if(data.hasOwnProperty(key)) {
@@ -194,11 +203,11 @@
     }
     return str
   }
-  
+
   function _getListSize(container) {
-  
+
   }
-  
+
   function _css(el, attr, value) {
     if(_is(attr, 'Object')) {
       for (var key in attr) {
@@ -216,14 +225,56 @@
     var style = css(el, null)
     return style[attr]
   }
-  
+
   function _getTranslateX(container) {
     var matrix = _css(container, 'transform')
     var reg = /matrix|\(|\)/g
     var x = matrix.replace(reg, '').split(',')[4]
     return parseFloat(x)
   }
-  
+
+  function easeOutMove(container, star, end, duration) {
+    var t = 0;
+    var timerId = null
+    var realDuration = Math.floor(duration / 17)
+    move();
+    function move() {
+      var offset = getOffsetX(t, star, end, realDuration)
+      _css(container, 'transform', 'translateX(' + offset + 'px)')
+      t++;
+      if(t > realDuration) {
+        window.cancelAnimationFrame(timerId);
+      } else {
+        timerId = window.requestAnimationFrame(move);
+      }
+    }
+  }
+
+  /**
+   * 计算缓冲运动位置(时间与偏移的函数)
+   * x = delta * (-2^-10t/d + 1)
+   * @param t {Number} current time   开始运动的时间
+   * @param s {Number} start offsetX  运动的起始x偏移
+   * @param e {Number} end offsetX    运动的结束x偏移
+   * @param d {Number} duration(ms)   运动持续时间
+   * @return {Number} offsetX  当前时间的x偏移
+   */
+  function getOffsetX(t, s, e, d) {
+    console.group('getOffsetX')
+    console.log('t: %o', t)
+    console.log('s: %o', s)
+    console.log('e: %o', e)
+    console.log('d: %o', d)
+    var delta = Math.abs(e - s);
+    var x = t >= d ? delta : delta * (-Math.pow(2, -10 * t / d) + 1);
+    var offset = s < e ? s + x : s - x;
+    console.log('delta: %o', delta)
+    console.log('x: %o', x)
+    console.log('offset: %o', offset)
+    console.groupEnd()
+    return offset
+  }
+
   window.SwipeList = SwipeList
-  
+
 })(window, document, void 0);
